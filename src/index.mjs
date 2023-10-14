@@ -1,4 +1,4 @@
-import { getStock } from './ScraipingStock.js'
+import { getStock } from './ScrapingStock.js'
 
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
 import {
@@ -62,7 +62,7 @@ export const handler = async () => {
     }
   } catch (err) {
     return {
-      statusCode: 5001,
+      statusCode: 500,
       body: 'updating is failed',
     }
   }
