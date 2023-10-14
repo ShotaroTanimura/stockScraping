@@ -2,43 +2,42 @@ import { getStock } from './ScrapingStock.js'
 
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
 import {
+  GetCommand,
   UpdateCommand,
-  QueryCommand,
   DynamoDBDocumentClient,
 } from '@aws-sdk/lib-dynamodb'
-
-const client = new DynamoDBClient({})
+const client = new DynamoDBClient()
 const docClient = DynamoDBDocumentClient.from(client)
 const tableName = 'StockManagement'
-
-export const handler = async () => {
-  const pathId = 1
-  const command = new QueryCommand({
+export const handler = async (event) => {
+  const pathId = event.pathParameters
+  const command = new GetCommand({
     TableName: tableName,
-    KeyConditionExpression: 'id = :id',
-    ExpressionAttributeValues: {
-      ':id': pathId,
-    },
+    Key: {
+      id: pathId
+    }
   })
   let response
   try {
     response = await docClient.send(command)
+    console.log(response)
   } catch (err) {
     return {
       statusCode: 500,
     }
   }
-  const data = response.Items
+
+  const data = response.Item
   const ticker = data.ticker
   let price
 
   try {
     let textPrice = await getStock(ticker)
     console.log(textPrice)
-    price = parseInt(textPrice)
+    price = parseFloat(textPrice)
   } catch (err) {
     return {
-      statusCode: 111,
+      statusCode: 500,
       body: 'scraiping failed',
     }
   }
